@@ -121,13 +121,16 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
   }
 
   # Aggregate data to minutely if secondly
-  if (gran == "sec") {
+  if (gran == "sec" || gran == "ms") { # ref: https://github.com/twitter/AnomalyDetection/pull/69/files
     x <- format_timestamp(aggregate(x[2],
                                     format(x[1], "%Y-%m-%d %H:%M:00"),
-                                    eval(parse(text = "sum"))))
+                                    sum)) # ref: https://github.com/twitter/AnomalyDetection/pull/44
+    gran <-  "min" # ref: https://github.com/twitter/AnomalyDetection/pull/98/files?diff=unified
   }
 
   period <- switch(gran,
+    sec = 3600, # ref: https://github.com/twitter/AnomalyDetection/pull/93/files
+    ms = 1000,  # ref: https://github.com/twitter/AnomalyDetection/pull/69/files
     min = 1440,
     hr = 24,
     # if the data is daily, then we need to bump the period to weekly to get multiple examples

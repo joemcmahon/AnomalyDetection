@@ -36,6 +36,26 @@ Shorter, snake-case aliases have also been provided:
 The original names are still in the package but the `README` and
 examples all use the newer, shorter versions.
 
+The following outstanding PRs from the original repo are included:
+
+  - Added in PR
+    [\#98](https://github.com/twitter/AnomalyDetection/pull/98/)
+    (@gggodhwani)
+  - Added in PR
+    [\#93](%3Chttps://github.com/twitter/AnomalyDetection/pull/93)
+    (@nujnimka)
+  - Added in PR
+    [\#69](%3Chttps://github.com/twitter/AnomalyDetection/pull/69)
+    (@randakar)
+  - Added in PR
+    [\#44](%3Chttps://github.com/twitter/AnomalyDetection/pull/44)
+    (@nicolasmiller)
+  - PR [\#92](https://github.com/twitter/AnomalyDetection/pull/92)
+    (@caijun) inherently resolved
+
+If those authors find this repo, please add yourselves to the
+`DESCRIPTION` as contirbutors.
+
 ## What’s Inside The Tin
 
 The following functions are implemented:
