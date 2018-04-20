@@ -42,13 +42,13 @@ The following outstanding PRs from the original repo are included:
     [\#98](https://github.com/twitter/AnomalyDetection/pull/98/)
     (@gggodhwani)
   - Added in PR
-    [\#93](%3Chttps://github.com/twitter/AnomalyDetection/pull/93)
+    [\#93](https://github.com/twitter/AnomalyDetection/pull/93)
     (@nujnimka)
   - Added in PR
-    [\#69](%3Chttps://github.com/twitter/AnomalyDetection/pull/69)
+    [\#69](https://github.com/twitter/AnomalyDetection/pull/69)
     (@randakar)
   - Added in PR
-    [\#44](%3Chttps://github.com/twitter/AnomalyDetection/pull/44)
+    [\#44](https://github.com/twitter/AnomalyDetection/pull/44)
     (@nicolasmiller)
   - PR [\#92](https://github.com/twitter/AnomalyDetection/pull/92)
     (@caijun) inherently resolved
