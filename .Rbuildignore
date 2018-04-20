@@ -1,4 +1,15 @@
 LICENSE
-.travis.yml
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^figs$
+^\.travis\.yml$
+^README\.*Rmd$
+^README\.*html$
+^NOTES\.*Rmd$
+^NOTES\.*html$
+^\.codecov\.yml$
+^README_files$
+^doc$
+^CONDUCT\.md$
+^README\.Rmd$
+^README-.*\.png$

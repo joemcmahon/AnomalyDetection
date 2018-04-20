@@ -1,111 +1,154 @@
-# AnomalyDetection R package
 
-[![Build Status](https://travis-ci.org/twitter/AnomalyDetection.png)](https://travis-ci.org/twitter/AnomalyDetection)
-[![Pending Pull-Requests](http://githubbadges.herokuapp.com/twitter/AnomalyDetection/pulls.svg?style=flat)](https://github.com/twitter/AnomalyDetection/pulls)
-[![Github Issues](http://githubbadges.herokuapp.com/twitter/AnomalyDetection/issues.svg)](https://github.com/twitter/AnomalyDetection/issues)
+[![Travis-CI Build
+Status](https://travis-ci.org/hrbrmstr/AnomalyDetection.svg?branch=master)](https://travis-ci.org/hrbrmstr/AnomalyDetection)
 
-AnomalyDetection is an open-source R package to detect anomalies which is
-robust, from a statistical standpoint, in the presence of seasonality and an
-underlying trend. The AnomalyDetection package can be used in wide variety of
-contexts. For example, detecting anomalies in system metrics after a new
-software release, user engagement post an A/B test, or for problems in
-econometrics, financial engineering, political and social sciences.
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# AnomalyDetection
+
+Anomaly Detection Using Seasonal Hybrid Extreme Studentized Deviate Test
+
+## Description
+
+A technique for detecting anomalies in seasonal univariate time series.
+The methods uses are robust, from a statistical standpoint, in the
+presence of seasonality and an underlying trend. These methods can be
+used in wide variety of contexts. For example, detecting anomalies in
+system metrics after a new software release, user engagement post an
+‘A/B’ test, or for problems in econometrics, financial engineering,
+political and social sciences.
+
+## What’s Inside The Tin
+
+The following functions are implemented:
+
+  - `AnomalyDetectionTs`: Anomaly Detection Using Seasonal Hybrid ESD
+    Test
+  - `AnomalyDetectionVec`: Anomaly Detection Using Seasonal Hybrid ESD
+    Test
 
 ## How the package works
 
-The underlying algorithm – referred to as Seasonal Hybrid ESD (S-H-ESD) builds
-upon the Generalized ESD test for detecting anomalies. Note that S-H-ESD can
-be used to detect both global as well as local anomalies. This is achieved by
-employing time series decomposition and using robust statistical metrics, viz.,
-median together with ESD. In addition, for long time series (say, 6 months of
-minutely data), the algorithm employs piecewise approximation - this is rooted
-to the fact that trend extraction in the presence of anomalies in non-trivial -
-for anomaly detection.
+The underlying algorithm – referred to as Seasonal Hybrid ESD (S-H-ESD)
+builds upon the Generalized ESD test for detecting anomalies. Note that
+S-H-ESD can be used to detect both global as well as local anomalies.
+This is achieved by employing time series decomposition and using robust
+statistical metrics, viz., median together with ESD. In addition, for
+long time series (say, 6 months of minutely data), the algorithm employs
+piecewise approximation - this is rooted to the fact that trend
+extraction in the presence of anomalies in non-trivial - for anomaly
+detection.
 
-Besides time series, the package can also be used to detect anomalies in a
-vector of numerical values. We have found this very useful as many times the
-corresponding timestamps are not available. The package provides rich
-visualization support. The user can specify the direction of anomalies, the
-window of interest (such as last day, last hour), enable/disable piecewise
-approximation; additionally, the x- and y-axis are annotated in a way to assist
-visual data analysis.
+Besides time series, the package can also be used to detect anomalies in
+a vector of numerical values. We have found this very useful as many
+times the corresponding timestamps are not available. The package
+provides rich visualization support. The user can specify the direction
+of anomalies, the window of interest (such as last day, last hour),
+enable/disable piecewise approximation; additionally, the x- and y-axis
+are annotated in a way to assist visual data analysis.
+
+## Installation
+
+You can install AnomalyDetection from github with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("hrbrmstr/AnomalyDetection")
+```
 
 ## How to get started
 
-Install the R package using the following commands on the R console:
-
-```
-install.packages("devtools")
-devtools::install_github("twitter/AnomalyDetection")
+``` r
 library(AnomalyDetection)
+library(hrbrthemes)
+library(tidyverse)
 ```
 
-The function AnomalyDetectionTs is called to detect one or more statistically
-significant anomalies in the input time series. The documentation of the
-function AnomalyDetectionTs, which can be seen by using the following command,
-details the input arguments and the output of the function AnomalyDetectionTs.
-
-```
-help(AnomalyDetectionTs)
-```
-
-The function AnomalyDetectionVec is called to detect one or more statistically
-significant anomalies in a vector of observations. The documentation of the
-function AnomalyDetectionVec, which can be seen by using the following command,
-details the input arguments and the output of the function AnomalyDetectionVec.
-
-```
-help(AnomalyDetectionVec)
-```
-
-## A simple example
-
-To get started, the user is recommended to use the example dataset which comes
-with the packages. Execute the following commands:
-
-```
+``` r
 data(raw_data)
-res = AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both', plot=TRUE)
-res$plot
+
+res <- AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both')
+
+glimpse(res)
+## List of 1
+##  $ anoms:'data.frame':   131 obs. of  2 variables:
+##   ..$ timestamp: POSIXlt[1:131], format: "1980-09-25 16:05:00" "1980-09-29 06:40:00" "1980-09-29 21:44:00" "1980-09-30 17:46:00" ...
+##   ..$ anoms    : num [1:131] 21.4 193.1 148.2 52.7 49.7 ...
+
+raw_data$timestamp <- as.POSIXct(raw_data$timestamp)
+res$anoms$timestamp <- as.POSIXct(res$anoms$timestamp)
+
+ggplot() +
+  geom_line(
+    data=raw_data, aes(timestamp, count), 
+    size=0.125, color="lightslategray"
+  )  +
+  geom_point(
+    data=res$anoms, aes(timestamp, anoms), color="#cb181d", alpha=1/3
+  ) +
+  scale_x_datetime(date_labels="%b\n%Y") +
+  scale_y_comma() +
+  theme_ipsum_rc(grid="XY")
 ```
 
-![Fig 1](https://github.com/twitter/AnomalyDetection/blob/master/figs/Fig1.png)
+<img src="README-unnamed-chunk-4-1.png" width="768" />
 
-From the plot, we observe that the input time series experiences both positive 
-and negative anomalies. Furthermore, many of the anomalies in the time series
-are local anomalies within the bounds of the time series’ seasonality (hence,
-cannot be detected using the traditional approaches). The anomalies detected
-using the proposed technique are annotated on the plot. In case the timestamps 
-for the plot above were not available, anomaly detection could then carried 
-out using the AnomalyDetectionVec function; specifically, one can use the 
-following command:
+From the plot, we observe that the input time series experiences both
+positive and negative anomalies. Furthermore, many of the anomalies in
+the time series are local anomalies within the bounds of the time
+series’ seasonality (hence, cannot be detected using the traditional
+approaches). The anomalies detected using the proposed technique are
+annotated on the plot. In case the timestamps for the plot above were
+not available, anomaly detection could then carried out using the
+AnomalyDetectionVec function; specifically, one can use the
+`AnomalyDetectionVec()` method.
 
+Often, anomaly detection is carried out on a periodic basis. For
+instance, at times, one may be interested in determining whether there
+was any anomaly yesterday. To this end, we support a flag only\_last
+whereby one can subset the anomalies that occurred during the last day
+or last hour.
+
+``` r
+data(raw_data)
+
+res <- AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both', only_last="day")
+
+glimpse(res)
+## List of 1
+##  $ anoms:'data.frame':   25 obs. of  2 variables:
+##   ..$ timestamp: POSIXlt[1:25], format: "1980-10-05 01:12:00" "1980-10-05 01:13:00" "1980-10-05 01:14:00" "1980-10-05 01:15:00" ...
+##   ..$ anoms    : num [1:25] 56.5 54.9 52 47.7 50.6 ...
+
+raw_data$timestamp <- as.POSIXct(raw_data$timestamp)
+res$anoms$timestamp <- as.POSIXct(res$anoms$timestamp)
+
+ggplot() +
+  geom_line(
+    data=raw_data, aes(timestamp, count), 
+    size=0.125, color="lightslategray"
+  )  +
+  geom_point(
+    data=res$anoms, aes(timestamp, anoms), color="#cb181d", alpha=1/3
+  ) +
+  scale_x_datetime(date_labels="%b\n%Y") +
+  scale_y_comma() +
+  theme_ipsum_rc(grid="XY")
 ```
-AnomalyDetectionVec(raw_data[,2], max_anoms=0.02, period=1440, direction='both', only_last=FALSE, plot=TRUE)
-```
 
-Often, anomaly detection is carried out on a periodic basis. For instance, at
-times, one may be interested in determining whether there was any anomaly
-yesterday. To this end, we support a flag only_last whereby one can subset the
-anomalies that occurred during the last day or last hour. Execute the following 
-command:
+<img src="README-unnamed-chunk-5-1.png" width="768" />
 
-```
-res = AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both', only_last=”day”, plot=TRUE)
-res$plot
-```
+Anomaly detection for long duration time series can be carried out by
+setting the longterm argument to `TRUE`.
 
-![Fig 2](https://github.com/twitter/AnomalyDetection/blob/master/figs/Fig2.png)
+## Copyright & License
 
-From the plot, we observe that only the anomalies that occurred during the last
-day have been annotated. Further, the prior six days are included to expose the
-seasonal nature of the time series but are put in the background as the window
-of prime interest is the last day.
-
-Anomaly detection for long duration time series can be carried out by setting
-the longterm argument to T. 
-
-## Copyright and License
-Copyright 2015 Twitter, Inc and other contributors
+Copyright © 2015 Twitter, Inc. and other contributors
 
 Licensed under the GPLv3
+
+## Code of Conduct
+
+Please note that this project is released with a [Contributor Code of
+Conduct](CONDUCT.md). By participating in this project you agree to
+abide by its terms.

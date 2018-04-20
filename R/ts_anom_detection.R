@@ -19,52 +19,28 @@
 #' See Details below.
 #' @param piecewise_median_period_weeks The piecewise median time window as described in Vallis, Hochenbaum, and Kejariwal (2014).
 #' Defaults to 2.
-#' @param plot A flag indicating if a plot with both the time series and the estimated anoms,
-#' indicated by circles, should also be returned.
-#' @param y_log Apply log scaling to the y-axis. This helps with viewing plots that have extremely
-#' large positive anomalies relative to the rest of the data.
-#' @param xlabel X-axis label to be added to the output plot.
-#' @param ylabel Y-axis label to be added to the output plot.
-#' @details
-#' \code{longterm} This option should be set when the input time series is longer than a month.
-#' The option enables the approach described in Vallis, Hochenbaum, and Kejariwal (2014).\cr\cr
-#' \code{threshold} Filter all negative anomalies and those anomalies whose magnitude is smaller
-#' than one of the specified thresholds which include: the median
-#' of the daily max values (med_max), the 95th percentile of the daily max values (p95), and the
-#' 99th percentile of the daily max values (p99).
-#' @param title Title for the output plot.
-#' @param verbose Enable debug messages.
-#' @param na.rm Remove any NAs in timestamps.(default: FALSE) 
+#' @param verbose Enable debug messages
+#' @param na.rm Remove any NAs in timestamps.(default: FALSE)
 #' @return The returned value is a list with the following components.
 #' @return \item{anoms}{Data frame containing timestamps, values, and optionally expected values.}
-#' @return \item{plot}{A graphical object if plotting was requested by the user. The plot contains
-#' the estimated anomalies annotated on the input time series.}
 #' @return One can save \code{anoms} to a file in the following fashion:
 #' \code{write.csv(<return list name>[["anoms"]], file=<filename>)}
-#' @return One can save \code{plot} to a file in the following fashion:
-#' \code{ggsave(<filename>, plot=<return list name>[["plot"]])}
 #' @references Vallis, O., Hochenbaum, J. and Kejariwal, A., (2014) "A Novel Technique for
 #' Long-Term Anomaly Detection in the Cloud", 6th USENIX, Philadelphia, PA.
 #' @references Rosner, B., (May 1983), "Percentage Points for a Generalized ESD Many-Outlier Procedure"
 #' , Technometrics, 25(2), pp. 165-172.
-#'
-#' @docType data
-#' @keywords datasets
-#' @name raw_data
-#'
 #' @examples
 #' data(raw_data)
-#' AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both', plot=TRUE)
+#' AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both')
 #' # To detect only the anomalies on the last day, run the following:
-#' AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both', only_last="day", plot=TRUE)
+#' AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both', only_last="day")
 #' @seealso \code{\link{AnomalyDetectionVec}}
 #' @export
 #'
 AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = 'pos',
                                alpha = 0.05, only_last = NULL, threshold = 'None',
-                               e_value = FALSE, longterm = FALSE, piecewise_median_period_weeks = 2, plot = FALSE,
-                               y_log = FALSE, xlabel = '', ylabel = 'count',
-                               title = NULL, verbose=FALSE, na.rm = FALSE){
+                               e_value = FALSE, longterm = FALSE, piecewise_median_period_weeks = 2,
+                               verbose=FALSE, na.rm = FALSE){
 
   # Check for supported inputs types
   if(!is.data.frame(x)){
@@ -82,11 +58,11 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = 'pos',
   if (any((names(x) == c("timestamp", "count")) == FALSE)) {
     colnames(x) <- c("timestamp", "count")
   }
-  
+
   if(!is.logical(na.rm)){
     stop("na.rm must be either TRUE (T) or FALSE (F)")
   }
-  
+
   # Deal with NAs in timestamps
   if(any(is.na(x$timestamp))){
     if(na.rm){
@@ -124,26 +100,6 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = 'pos',
   }
   if(piecewise_median_period_weeks < 2){
     stop("piecewise_median_period_weeks must be at greater than 2 weeks")
-  }
-  if(!is.logical(plot)){
-    stop("plot must be either TRUE (T) or FALSE (F)")
-  }
-  if(!is.logical(y_log)){
-    stop("y_log must be either TRUE (T) or FALSE (F)")
-  }
-  if(!is.character(xlabel)){
-    stop("xlabel must be a string")
-  }
-  if(!is.character(ylabel)){
-    stop("ylabel must be a string")
-  }
-  if(!is.character(title) && !is.null(title)){
-    stop("title must be a string")
-  }
-  if(is.null(title)){
-    title <- ""
-  } else {
-    title <- paste(title, " : ", sep="")
   }
 
   # -- Main analysis: Perform S-H-ESD
@@ -285,7 +241,7 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = 'pos',
 
     # subset the last days worth of data
     x_subset_single_day <- subset(x, (x[[1]] > start_anoms))
-    # When plotting anoms for the last day only we only show the previous weeks data
+
     x_subset_week <- subset(x, ((x[[1]] <= start_anoms) & (x[[1]] > start_date)))
     all_anoms <- subset(all_anoms, all_anoms[[1]] >= x_subset_single_day[[1]][1])
     num_obs <- length(x_subset_single_day[[2]])
@@ -297,54 +253,15 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = 'pos',
   # If there are no anoms, then let's exit
   if(anom_pct == 0){
     if(verbose) message("No anomalies detected.")
-    return (list("anoms"=data.frame(), "plot"=plot.new()))
-  }
-
-  if(plot){
-    # -- Build title for plots utilizing parameters set by user
-    plot_title <-  paste(title, round(anom_pct, digits=2), "% Anomalies (alpha=", alpha, ", direction=", direction,")", sep="")
-    if(longterm){
-      plot_title <- paste(plot_title, ", longterm=T", sep="")
-    }
-
-    # -- Plot raw time series data
-    color_name <- paste("\"", title, "\"", sep="")
-    alpha <- 0.8
-    if(!is.null(only_last)){
-      xgraph <- ggplot2::ggplot(x_subset_week, ggplot2::aes_string(x="timestamp", y="count")) + ggplot2::theme_bw() + ggplot2::theme(panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), text=ggplot2::element_text(size = 14))
-      xgraph <- xgraph + ggplot2::geom_line(data=x_subset_week, ggplot2::aes_string(colour=color_name), alpha=alpha*.33) + ggplot2::geom_line(data=x_subset_single_day, ggplot2::aes_string(color=color_name), alpha=alpha)
-      week_rng = get_range(x_subset_week, index=2, y_log=y_log)
-      day_rng = get_range(x_subset_single_day, index=2, y_log=y_log)
-      yrange = c(min(week_rng[1],day_rng[1]), max(week_rng[2],day_rng[2]))
-      xgraph <- add_day_labels_datetime(xgraph, breaks=breaks, start=as.POSIXlt(min(x_subset_week[[1]]), tz="UTC"), end=as.POSIXlt(max(x_subset_single_day[[1]]), tz="UTC"), days_per_line=num_days_per_line)
-      xgraph <- xgraph + ggplot2::labs(x=xlabel, y=ylabel, title=plot_title)
-    }else{
-      xgraph <- ggplot2::ggplot(x, ggplot2::aes_string(x="timestamp", y="count")) + ggplot2::theme_bw() + ggplot2::theme(panel.grid.major = ggplot2::element_line(colour = "gray60"), panel.grid.major.y = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(), text=ggplot2::element_text(size = 14))
-      xgraph <- xgraph + ggplot2::geom_line(data=x, ggplot2::aes_string(colour=color_name), alpha=alpha)
-      yrange <- get_range(x, index=2, y_log=y_log)
-      xgraph <- xgraph + ggplot2::scale_x_datetime(labels=function(x) ifelse(as.POSIXlt(x, tz="UTC")$hour != 0,strftime(x, format="%kh", tz="UTC"), strftime(x, format="%b %e", tz="UTC")),
-                                                  expand=c(0,0))
-      xgraph <- xgraph + ggplot2::labs(x=xlabel, y=ylabel, title=plot_title)
-    }
-
-    # Add anoms to the plot as circles.
-    # We add zzz_ to the start of the name to ensure that the anoms are listed after the data sets.
-    xgraph <- xgraph + ggplot2::geom_point(data=all_anoms, ggplot2::aes_string(color=paste("\"zzz_",title,"\"",sep="")), size = 3, shape = 1)
-
-    # Hide legend
-    xgraph <- xgraph + ggplot2::theme(legend.position="none")
-
-    # Use log scaling if set by user
-    xgraph <- xgraph + add_formatted_y(yrange, y_log=y_log)
-
+    return (list("anoms"=data.frame()))
   }
 
   # Fix to make sure date-time is correct and that we retain hms at midnight
   all_anoms[[1]] <- format(all_anoms[[1]], format="%Y-%m-%d %H:%M:%S")
-  
+
   # Store expected values if set by user
   if(e_value) {
-    anoms <- data.frame(timestamp=all_anoms[[1]], anoms=all_anoms[[2]], 
+    anoms <- data.frame(timestamp=all_anoms[[1]], anoms=all_anoms[[2]],
                         expected_value=subset(seasonal_plus_trend[[2]], as.POSIXlt(seasonal_plus_trend[[1]], tz="UTC") %in% all_anoms[[1]]),
                         stringsAsFactors=FALSE)
   } else {
@@ -355,10 +272,6 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = 'pos',
   # TODO: Make sure we keep original datetime format and timezone.
   anoms$timestamp <- as.POSIXlt(anoms$timestamp, tz="UTC")
 
-  # Lastly, return anoms and optionally the plot if requested by the user
-  if(plot){
-    return (list(anoms = anoms, plot = xgraph))
-  } else {
-    return (list(anoms = anoms, plot = plot.new()))
-  }
+  return (list(anoms = anoms))
+
 }
