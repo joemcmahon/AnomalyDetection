@@ -2,6 +2,8 @@
 
 export(AnomalyDetectionTs)
 export(AnomalyDetectionVec)
+export(ad_ts)
+export(ad_vec)
 importFrom(lubridate,days)
 importFrom(lubridate,floor_date)
 importFrom(lubridate,hours)

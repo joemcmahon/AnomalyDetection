@@ -16,5 +16,6 @@ test_that("checking that midnight dates get H%M%S format applied", {
                                                  direction='both',
                                                  only_last = "day", e_value = TRUE)
 
-    expect_equal(length(anomalyDetectionResult$anoms$anoms), length(anomalyDetectionResult$anoms$expected_value))
+    expect_equal(length(anomalyDetectionResult$anoms),
+                 length(anomalyDetectionResult$expected_value))
 })

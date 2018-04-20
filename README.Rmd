@@ -32,12 +32,30 @@ wide variety of contexts. For example, detecting anomalies in system metrics aft
 a new software release, user engagement post an 'A/B' test, or for problems in 
 econometrics, financial engineering, political and social sciences.
 
+## About This Fork
+
+Twitterfolks launched this package in 2014. Many coding and package standards 
+have changed. The package now conforms to CRAN standards.
+
+The plots were nice and all but terribly unnecessary. The two core functions
+have been modified to only return tidy data frames (tibbles, actually). This
+makes it easier to chain them without having to deal with list element 
+dereferencing.
+
+Shorter, snake-case aliases have also been provided:
+
+- `ad_ts` for `AnomalyDetectionTs`
+- `ad_vec` for `AnomalyDetectionVec`
+
+The original names are still in the package but the `README` and examples
+all use the newer, shorter versions.
+
 ## What's Inside The Tin
 
 The following functions are implemented:
 
-- `AnomalyDetectionTs`:	Anomaly Detection Using Seasonal Hybrid ESD Test
-- `AnomalyDetectionVec`:	Anomaly Detection Using Seasonal Hybrid ESD Test
+- `ad_ts`:	Anomaly Detection Using Seasonal Hybrid ESD Test
+- `ad_vec`:	Anomaly Detection Using Seasonal Hybrid ESD Test
 
 ## How the package works
 
@@ -82,12 +100,12 @@ library(tidyverse)
 ```{r message=FALSE, warning=FALSE, error=FALSE}
 data(raw_data)
 
-res <- AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both')
+res <- ad_ts(raw_data, max_anoms=0.02, direction='both')
 
 glimpse(res)
 
+# for ggplot2
 raw_data$timestamp <- as.POSIXct(raw_data$timestamp)
-res$anoms$timestamp <- as.POSIXct(res$anoms$timestamp)
 
 ggplot() +
   geom_line(
@@ -95,7 +113,7 @@ ggplot() +
     size=0.125, color="lightslategray"
   )  +
   geom_point(
-    data=res$anoms, aes(timestamp, anoms), color="#cb181d", alpha=1/3
+    data=res, aes(timestamp, anoms), color="#cb181d", alpha=1/3
   ) +
   scale_x_datetime(date_labels="%b\n%Y") +
   scale_y_comma() +
@@ -109,7 +127,11 @@ cannot be detected using the traditional approaches). The anomalies detected
 using the proposed technique are annotated on the plot. In case the timestamps 
 for the plot above were not available, anomaly detection could then carried 
 out using the AnomalyDetectionVec function; specifically, one can use the 
-`AnomalyDetectionVec()` method.
+`AnomalyDetectionVec()` method. The equivalent call to the above would be:
+
+```{r eval=FALSE}
+ad_vec(raw_data[,2], max_anoms=0.02, period=1440, direction='both')
+```
 
 Often, anomaly detection is carried out on a periodic basis. For instance, at
 times, one may be interested in determining whether there was any anomaly
@@ -119,12 +141,12 @@ anomalies that occurred during the last day or last hour.
 ```{r message=FALSE, warning=FALSE, error=FALSE}
 data(raw_data)
 
-res <- AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both', only_last="day")
+res <- ad_ts(raw_data, max_anoms=0.02, direction='both', only_last="day")
 
 glimpse(res)
 
+# for ggplot2
 raw_data$timestamp <- as.POSIXct(raw_data$timestamp)
-res$anoms$timestamp <- as.POSIXct(res$anoms$timestamp)
 
 ggplot() +
   geom_line(
@@ -132,7 +154,7 @@ ggplot() +
     size=0.125, color="lightslategray"
   )  +
   geom_point(
-    data=res$anoms, aes(timestamp, anoms), color="#cb181d", alpha=1/3
+    data=res, aes(timestamp, anoms), color="#cb181d", alpha=1/3
   ) +
   scale_x_datetime(date_labels="%b\n%Y") +
   scale_y_comma() +

@@ -2,9 +2,15 @@
 % Please edit documentation in R/ts_anom_detection.R
 \name{AnomalyDetectionTs}
 \alias{AnomalyDetectionTs}
+\alias{ad_ts}
 \title{Anomaly Detection Using Seasonal Hybrid ESD Test}
 \usage{
 AnomalyDetectionTs(x, max_anoms = 0.1, direction = "pos", alpha = 0.05,
+  only_last = NULL, threshold = "None", e_value = FALSE,
+  longterm = FALSE, piecewise_median_period_weeks = 2, verbose = FALSE,
+  na.rm = FALSE)
+
+ad_ts(x, max_anoms = 0.1, direction = "pos", alpha = 0.05,
   only_last = NULL, threshold = "None", e_value = FALSE,
   longterm = FALSE, piecewise_median_period_weeks = 2, verbose = FALSE,
   na.rm = FALSE)
@@ -40,12 +46,8 @@ Defaults to 2.}
 \item{na.rm}{Remove any NAs in timestamps.(default: FALSE)}
 }
 \value{
-The returned value is a list with the following components.
-
-\item{anoms}{Data frame containing timestamps, values, and optionally expected values.}
-
-One can save \code{anoms} to a file in the following fashion:
-\code{write.csv(<return list name>[["anoms"]], file=<filename>)}
+The returned value is a data frame containing timestamps, values,
+        and optionally expected values.
 }
 \description{
 A technique for detecting anomalies in seasonal univariate time series where the input is a
@@ -53,16 +55,18 @@ series of <timestamp, count> pairs.
 }
 \examples{
 data(raw_data)
-AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both')
+
+ad_ts(raw_data, max_anoms=0.02, direction='both')
+
 # To detect only the anomalies on the last day, run the following:
-AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both', only_last="day")
+
+ad_ts(raw_data, max_anoms=0.02, direction='both', only_last="day")
 }
 \references{
 Vallis, O., Hochenbaum, J. and Kejariwal, A., (2014) "A Novel Technique for
-Long-Term Anomaly Detection in the Cloud", 6th USENIX, Philadelphia, PA.
-
-Rosner, B., (May 1983), "Percentage Points for a Generalized ESD Many-Outlier Procedure"
-, Technometrics, 25(2), pp. 165-172.
+            Long-Term Anomaly Detection in the Cloud", 6th USENIX, Philadelphia, PA.
+            Rosner, B., (May 1983), "Percentage Points for a Generalized ESD Many-Outlier Procedure"
+            , Technometrics, 25(2), pp. 165-172.
 }
 \seealso{
 \code{\link{AnomalyDetectionVec}}

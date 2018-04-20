@@ -2,9 +2,14 @@
 % Please edit documentation in R/vec_anom_detection.R
 \name{AnomalyDetectionVec}
 \alias{AnomalyDetectionVec}
+\alias{ad_vec}
 \title{Anomaly Detection Using Seasonal Hybrid ESD Test}
 \usage{
 AnomalyDetectionVec(x, max_anoms = 0.1, direction = "pos", alpha = 0.05,
+  period = NULL, only_last = FALSE, threshold = "None", e_value = FALSE,
+  longterm_period = NULL, verbose = FALSE)
+
+ad_vec(x, max_anoms = 0.1, direction = "pos", alpha = 0.05,
   period = NULL, only_last = FALSE, threshold = "None", e_value = FALSE,
   longterm_period = NULL, verbose = FALSE)
 }
@@ -39,9 +44,7 @@ This increases anom detection efficacy for time series that are greater than a m
 \value{
 The returned value is a list with the following components.
 
-\item{anoms}{Data frame containing index, values, and optionally expected values.}
-        One can save \code{anoms} to a file in the following fashion:
-        \code{write.csv(<return list name>[["anoms"]], file=<filename>)}
+Data frame containing index, values, and optionally expected values.
 }
 \description{
 A technique for detecting anomalies in seasonal univariate time series where the input is a
@@ -49,10 +52,14 @@ series of observations.
 }
 \examples{
 data(raw_data)
-AnomalyDetectionVec(raw_data[,2], max_anoms=0.02, period=1440, direction='both')
+
+ad_vec(raw_data[,2], max_anoms=0.02, period=1440, direction='both')
+
 # To detect only the anomalies in the last period, run the following:
-AnomalyDetectionVec(raw_data[,2], max_anoms=0.02, period=1440, direction='both',
-only_last=TRUE)
+
+ad_vec(
+  raw_data[,2], max_anoms=0.02, period=1440, direction='both', only_last=TRUE
+)
 }
 \references{
 Vallis, O., Hochenbaum, J. and Kejariwal, A., (2014) "A Novel Technique for

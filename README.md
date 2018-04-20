@@ -18,14 +18,30 @@ system metrics after a new software release, user engagement post an
 ‘A/B’ test, or for problems in econometrics, financial engineering,
 political and social sciences.
 
+## About This Fork
+
+Twitterfolks launched this package in 2014. Many coding and package
+standards have changed. The package now conforms to CRAN standards.
+
+The plots were nice and all but terribly unnecessary. The two core
+functions have been modified to only return tidy data frames (tibbles,
+actually). This makes it easier to chain them without having to deal
+with list element dereferencing.
+
+Shorter, snake-case aliases have also been provided:
+
+  - `ad_ts` for `AnomalyDetectionTs`
+  - `ad_vec` for `AnomalyDetectionVec`
+
+The original names are still in the package but the `README` and
+examples all use the newer, shorter versions.
+
 ## What’s Inside The Tin
 
 The following functions are implemented:
 
-  - `AnomalyDetectionTs`: Anomaly Detection Using Seasonal Hybrid ESD
-    Test
-  - `AnomalyDetectionVec`: Anomaly Detection Using Seasonal Hybrid ESD
-    Test
+  - `ad_ts`: Anomaly Detection Using Seasonal Hybrid ESD Test
+  - `ad_vec`: Anomaly Detection Using Seasonal Hybrid ESD Test
 
 ## How the package works
 
@@ -67,16 +83,16 @@ library(tidyverse)
 ``` r
 data(raw_data)
 
-res <- AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both')
+res <- ad_ts(raw_data, max_anoms=0.02, direction='both')
 
 glimpse(res)
-## List of 1
-##  $ anoms:'data.frame':   131 obs. of  2 variables:
-##   ..$ timestamp: POSIXlt[1:131], format: "1980-09-25 16:05:00" "1980-09-29 06:40:00" "1980-09-29 21:44:00" "1980-09-30 17:46:00" ...
-##   ..$ anoms    : num [1:131] 21.4 193.1 148.2 52.7 49.7 ...
+## Observations: 131
+## Variables: 2
+## $ timestamp <dttm> 1980-09-25 16:05:00, 1980-09-29 06:40:00, 1980-09-29 21:44:00, 1980-09-30 17:46:00, 1980-09-30 1...
+## $ anoms     <dbl> 21.3510, 193.1036, 148.1740, 52.7478, 49.6582, 35.6067, 32.5045, 30.0555, 31.2614, 30.2551, 27.38...
 
+# for ggplot2
 raw_data$timestamp <- as.POSIXct(raw_data$timestamp)
-res$anoms$timestamp <- as.POSIXct(res$anoms$timestamp)
 
 ggplot() +
   geom_line(
@@ -84,7 +100,7 @@ ggplot() +
     size=0.125, color="lightslategray"
   )  +
   geom_point(
-    data=res$anoms, aes(timestamp, anoms), color="#cb181d", alpha=1/3
+    data=res, aes(timestamp, anoms), color="#cb181d", alpha=1/3
   ) +
   scale_x_datetime(date_labels="%b\n%Y") +
   scale_y_comma() +
@@ -101,7 +117,12 @@ approaches). The anomalies detected using the proposed technique are
 annotated on the plot. In case the timestamps for the plot above were
 not available, anomaly detection could then carried out using the
 AnomalyDetectionVec function; specifically, one can use the
-`AnomalyDetectionVec()` method.
+`AnomalyDetectionVec()` method. The equivalent call to the above would
+be:
+
+``` r
+ad_vec(raw_data[,2], max_anoms=0.02, period=1440, direction='both')
+```
 
 Often, anomaly detection is carried out on a periodic basis. For
 instance, at times, one may be interested in determining whether there
@@ -112,16 +133,16 @@ or last hour.
 ``` r
 data(raw_data)
 
-res <- AnomalyDetectionTs(raw_data, max_anoms=0.02, direction='both', only_last="day")
+res <- ad_ts(raw_data, max_anoms=0.02, direction='both', only_last="day")
 
 glimpse(res)
-## List of 1
-##  $ anoms:'data.frame':   25 obs. of  2 variables:
-##   ..$ timestamp: POSIXlt[1:25], format: "1980-10-05 01:12:00" "1980-10-05 01:13:00" "1980-10-05 01:14:00" "1980-10-05 01:15:00" ...
-##   ..$ anoms    : num [1:25] 56.5 54.9 52 47.7 50.6 ...
+## Observations: 25
+## Variables: 2
+## $ timestamp <dttm> 1980-10-05 01:12:00, 1980-10-05 01:13:00, 1980-10-05 01:14:00, 1980-10-05 01:15:00, 1980-10-05 0...
+## $ anoms     <dbl> 56.4691, 54.9415, 52.0359, 47.7313, 50.5876, 48.2846, 44.6438, 42.3077, 38.8363, 41.0145, 39.5523...
 
+# for ggplot2
 raw_data$timestamp <- as.POSIXct(raw_data$timestamp)
-res$anoms$timestamp <- as.POSIXct(res$anoms$timestamp)
 
 ggplot() +
   geom_line(
@@ -129,14 +150,14 @@ ggplot() +
     size=0.125, color="lightslategray"
   )  +
   geom_point(
-    data=res$anoms, aes(timestamp, anoms), color="#cb181d", alpha=1/3
+    data=res, aes(timestamp, anoms), color="#cb181d", alpha=1/3
   ) +
   scale_x_datetime(date_labels="%b\n%Y") +
   scale_y_comma() +
   theme_ipsum_rc(grid="XY")
 ```
 
-<img src="README-unnamed-chunk-5-1.png" width="768" />
+<img src="README-unnamed-chunk-6-1.png" width="768" />
 
 Anomaly detection for long duration time series can be carried out by
 setting the longterm argument to `TRUE`.
