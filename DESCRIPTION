@@ -8,7 +8,10 @@ Authors@R: c(
     person("Jordan", "Hochenbaum", email = "jhochenbaum@gmail.com", role = "aut"),
     person("Arun", "Kejariwal", email = "zdkurtz@gmail.com", role = "aut"),
     person("Bob", "Rudis", email = "bob@rud.is", role = c("aut", "ctb"),
-           comment = c(ORCID = "0000-0001-5670-2640"))
+           comment = c(ORCID = "0000-0001-5670-2640")),
+    person("Yuan", "Tang", role = c("aut", "cph"),
+         email = "terrytangyuan@gmail.com",
+         comment = c(ORCID = "0000-0001-5243-233X"))
   )
 Maintainer: 
     Owen S. Vallis <owensvallis@gmail.com>, 
