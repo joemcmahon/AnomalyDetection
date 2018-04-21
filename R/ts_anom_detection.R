@@ -41,7 +41,7 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
                                alpha = 0.05, only_last = NULL, threshold = "None",
                                e_value = FALSE, longterm = FALSE, piecewise_median_period_weeks = 2,
                                verbose=FALSE, na.rm = FALSE) {
-
+  
   # Check for supported inputs types
   if (!is.data.frame(x)) {
     stop("data must be a single data frame.")
@@ -60,11 +60,11 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
   if (any((names(x) == c("timestamp", "count")) == FALSE)) {
     colnames(x) <- c("timestamp", "count")
   }
-
+  
   if (!is.logical(na.rm)) {
     stop("na.rm must be either TRUE (T) or FALSE (F)")
   }
-
+  
   # Deal with NAs in timestamps
   if (any(is.na(x$timestamp))) {
     if (na.rm) {
@@ -73,7 +73,7 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
       stop("timestamp contains NAs, please set na.rm to TRUE or remove the NAs manually.")
     }
   }
-
+  
   # Sanity check all input parameters
   if (max_anoms > .49) {
     stop(paste("max_anoms must be less than 50% of the data points (max_anoms =",
@@ -104,13 +104,13 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
   if (piecewise_median_period_weeks < 2) {
     stop("piecewise_median_period_weeks must be at greater than 2 weeks")
   }
-
+  
   # -- Main analysis: Perform S-H-ESD
-
+  
   # Derive number of observations in a single day.
   # Although we derive this in S-H-ESD, we also need it to be minutley later on so we do it here first.
   gran <- get_gran(x, 1)
-
+  
   if (gran == "day") {
     num_days_per_line <- 7
     if (is.character(only_last) && only_last == "hr") {
@@ -119,7 +119,7 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
   } else {
     num_days_per_line <- 1
   }
-
+  
   # Aggregate data to minutely if secondly
   if (gran == "sec" || gran == "ms") { # ref: https://github.com/twitter/AnomalyDetection/pull/69/files
     x <- format_timestamp(aggregate(x[2],
@@ -127,23 +127,23 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
                                     sum)) # ref: https://github.com/twitter/AnomalyDetection/pull/44
     gran <-  "min" # ref: https://github.com/twitter/AnomalyDetection/pull/98/files?diff=unified
   }
-
+  
   period <- switch(gran,
-    sec = 3600, # ref: https://github.com/twitter/AnomalyDetection/pull/93/files
-    ms = 1000,  # ref: https://github.com/twitter/AnomalyDetection/pull/69/files
-    min = 1440,
-    hr = 24,
-    # if the data is daily, then we need to bump the period to weekly to get multiple examples
-    day = 7
+                   sec = 3600, # ref: https://github.com/twitter/AnomalyDetection/pull/93/files
+                   ms = 1000,  # ref: https://github.com/twitter/AnomalyDetection/pull/69/files
+                   min = 1440,
+                   hr = 24,
+                   # if the data is daily, then we need to bump the period to weekly to get multiple examples
+                   day = 7
   )
   num_obs <- length(x[[2]])
-
+  
   if (max_anoms < 1 / num_obs) {
     max_anoms <- 1 / num_obs
   }
-
+  
   # -- Setup for longterm time series
-
+  
   # If longterm is enabled, break the data into subset data frames and store in all_data
   if (longterm) {
     # Pre-allocate list with size equal to the number of piecewise_median_period_weeks chunks in x + any left over chunk
@@ -156,10 +156,10 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
       num_obs_in_period <- period * 7 * piecewise_median_period_weeks
       num_days_in_period <- (7 * piecewise_median_period_weeks)
     }
-
+    
     # Store last date in time series
     last_date <- x[[1]][num_obs]
-
+    
     all_data <- vector(mode = "list", length = ceiling(length(x[[1]]) / (num_obs_in_period)))
     # Subset x into piecewise_median_period_weeks chunks
     for (j in seq(1, length(x[[1]]), by = num_obs_in_period)) {
@@ -167,54 +167,55 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
       end_date <- min(start_date + lubridate::days(num_days_in_period), x[[1]][length(x[[1]])])
       # if there is at least 14 days left, subset it, otherwise subset last_date - 14days
       if (difftime(end_date, start_date, units = "days") == as.difftime(num_days_in_period, units = "days")) {
-        all_data[[ceiling(j / (num_obs_in_period))]] <- subset(x, x[[1]] >= start_date & x[[1]] < end_date)
+        all_data[[ceiling(j / (num_obs_in_period))]] <- x[x[[1]] >= start_date & x[[1]] < end_date, ]
       } else {
         all_data[[ceiling(j / (num_obs_in_period))]] <-
-          subset(x, x[[1]] > (last_date - lubridate::days(num_days_in_period)) & x[[1]] <= last_date)
+          x[x[[1]] > (last_date - lubridate::days(num_days_in_period)) & x[[1]] <= last_date, ]
       }
     }
   } else {
     # If longterm is not enabled, then just overwrite all_data list with x as the only item
     all_data <- list(x)
   }
-
+  
   # Create empty data frames to store all anoms and seasonal+trend component from decomposition
   all_anoms <- data.frame(timestamp = numeric(0), count = numeric(0))
   seasonal_plus_trend <- data.frame(timestamp = numeric(0), count = numeric(0))
-
+  
   # Detect anomalies on all data (either entire data in one-pass, or in 2 week blocks if longterm=TRUE)
   for (i in 1:length(all_data)) {
     anomaly_direction <- switch(direction,
-      "pos" = data.frame(one_tail = TRUE, upper_tail = TRUE), # upper-tail only (positive going anomalies)
-      "neg" = data.frame(one_tail = TRUE, upper_tail = FALSE), # lower-tail only (negative going anomalies)
-      "both" = data.frame(one_tail = FALSE, upper_tail = TRUE)
+                                "pos" = data.frame(one_tail = TRUE, upper_tail = TRUE), # upper-tail only (positive going anomalies)
+                                "neg" = data.frame(one_tail = TRUE, upper_tail = FALSE), # lower-tail only (negative going anomalies)
+                                "both" = data.frame(one_tail = FALSE, upper_tail = TRUE)
     ) # Both tails. Tail direction is not actually used.
-
+    
     # detect_anoms actually performs the anomaly detection and returns the results in a list containing the anomalies
     # as well as the decomposed components of the time series for further analysis.
     s_h_esd_timestamps <- detect_anoms(all_data[[i]],
-      k = max_anoms, alpha = alpha, num_obs_per_period = period,
-      use_decomp = TRUE, use_esd = FALSE,
-      one_tail = anomaly_direction$one_tail, upper_tail = anomaly_direction$upper_tail,
-      verbose = verbose
+                                       k = max_anoms, alpha = alpha, num_obs_per_period = period,
+                                       use_decomp = TRUE, use_esd = FALSE,
+                                       one_tail = anomaly_direction$one_tail, upper_tail = anomaly_direction$upper_tail,
+                                       verbose = verbose
     )
-
+    
     # store decomposed components in local variable and overwrite s_h_esd_timestamps to contain only the anom timestamps
     data_decomp <- s_h_esd_timestamps$stl
     s_h_esd_timestamps <- s_h_esd_timestamps$anoms
-
+    
     # -- Step 3: Use detected anomaly timestamps to extract the actual anomalies (timestamp and value) from the data
     if (!is.null(s_h_esd_timestamps)) {
-      anoms <- subset(all_data[[i]], (all_data[[i]][[1]] %in% s_h_esd_timestamps))
+      #anoms <- subset(all_data[[i]], (all_data[[i]][[1]] %in% s_h_esd_timestamps))
+      anoms <- all_data[[i]][(all_data[[i]][[1]] %in% s_h_esd_timestamps), ]
     } else {
       anoms <- data.frame(timestamp = numeric(0), count = numeric(0))
     }
-
+    
     # Filter the anomalies using one of the thresholding functions if applicable
     if (threshold != "None") {
       # Calculate daily max values
       periodic_maxs <- tapply(x[[2]], as.Date(x[[1]]), FUN = max)
-
+      
       # Calculate the threshold set by the user
       if (threshold == "med_max") {
         thresh <- median(periodic_maxs)
@@ -224,16 +225,17 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
         thresh <- quantile(periodic_maxs, .99)
       }
       # Remove any anoms below the threshold
-      anoms <- subset(anoms, anoms[[2]] >= thresh)
+      #anoms <- subset(anoms, anoms[[2]] >= thresh)
+      anoms <- anoms[anoms[[2]] >= thresh, ]
     }
     all_anoms <- rbind(all_anoms, anoms)
     seasonal_plus_trend <- rbind(seasonal_plus_trend, data_decomp)
   }
-
+  
   # Cleanup potential duplicates
   all_anoms <- all_anoms[!duplicated(all_anoms[[1]]), ]
   seasonal_plus_trend <- seasonal_plus_trend[!duplicated(seasonal_plus_trend[[1]]), ]
-
+  
   # -- If only_last was set by the user, create subset of the data that represent the most recent day
   if (!is.null(only_last)) {
     start_date <- x[[1]][num_obs] - lubridate::days(7)
@@ -252,48 +254,47 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
         breaks <- 3
       }
     }
-
+    
     # subset the last days worth of data
-    x_subset_single_day <- subset(x, (x[[1]] > start_anoms))
-
-    x_subset_week <- subset(x, ((x[[1]] <= start_anoms) & (x[[1]] > start_date)))
-    all_anoms <- subset(all_anoms, all_anoms[[1]] >= x_subset_single_day[[1]][1])
+    #x_subset_single_day <- subset(x, (x[[1]] > start_anoms))
+    x_subset_single_day <- x[x[[1]] > start_anoms, ]
+    
+    x_subset_week <- x[(x[[1]] <= start_anoms) & (x[[1]] > start_date), ]
+    all_anoms <- all_anoms[all_anoms[[1]] >= x_subset_single_day[[1]][1], ]
     num_obs <- length(x_subset_single_day[[2]])
   }
-
+  
   # Calculate number of anomalies as a percentage
   anom_pct <- (length(all_anoms[[2]]) / num_obs) * 100
-
+  
   # If there are no anoms, then let's exit
   if (anom_pct == 0) {
     if (verbose) message("No anomalies detected.")
     return(data.frame())
   }
-
+  
   # Fix to make sure date-time is correct and that we retain hms at midnight
   all_anoms[[1]] <- format(all_anoms[[1]], format = "%Y-%m-%d %H:%M:%S")
-
+  
   # Store expected values if set by user
   if (e_value) {
     anoms <- data.frame(
       timestamp = all_anoms[[1]], anoms = all_anoms[[2]],
-      expected_value = subset(seasonal_plus_trend[[2]],
-                              as.POSIXlt(seasonal_plus_trend[[1]], tz = "UTC")
-                              %in% all_anoms[[1]]),
+      expected_value = seasonal_plus_trend[[2]][as.POSIXlt(seasonal_plus_trend[[1]], tz = "UTC") %in% all_anoms[[1]]],
       stringsAsFactors = FALSE
     )
   } else {
     anoms <- data.frame(timestamp = all_anoms[[1]], anoms = all_anoms[[2]],
                         stringsAsFactors = FALSE)
   }
-
+  
   # Make sure we're still a valid POSIXct datetime.
   # TODO: Make sure we keep original datetime format and timezone.
-
+  
   anoms$timestamp <- as.POSIXct(anoms$timestamp, tz = "UTC")
-
+  
   class(anoms) <- c("tbl_df", "tbl", "data.frame")
-
+  
   return(anoms)
 }
 
