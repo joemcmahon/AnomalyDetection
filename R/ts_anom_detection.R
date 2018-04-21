@@ -224,7 +224,6 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
         thresh <- quantile(periodic_maxs, .99)
       }
       # Remove any anoms below the threshold
-      #anoms <- subset(anoms, anoms[[2]] >= thresh)
       anoms <- anoms[anoms[[2]] >= thresh, ]
     }
     all_anoms <- rbind(all_anoms, anoms)
