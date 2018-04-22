@@ -97,10 +97,10 @@ AnomalyDetectionVec <- function(x, max_anoms=0.10, direction="pos",
       # if there is at least longterm_period left, subset it, otherwise subset last_index - longterm_period
       if ((end_index - start_index + 1) == longterm_period) {
         all_data[[ceiling(j / (longterm_period))]] <-
-          subset(x, x[[1]] >= start_index & x[[1]] <= end_index)
+          x[x[[1]] >= start_index & x[[1]] <= end_index, ]
       } else {
         all_data[[ceiling(j / (longterm_period))]] <-
-          subset(x, x[[1]] > (num_obs - longterm_period) & x[[1]] <= num_obs)
+          x[x[[1]] > (num_obs - longterm_period) & x[[1]] <= num_obs, ]
       }
     }
   } else {
@@ -134,7 +134,7 @@ AnomalyDetectionVec <- function(x, max_anoms=0.10, direction="pos",
 
     # -- Step 3: Use detected anomaly timestamps to extract the actual anomalies (timestamp and value) from the data
     if (!is.null(s_h_esd_timestamps)) {
-      anoms <- subset(all_data[[i]], (all_data[[i]][[1]] %in% s_h_esd_timestamps))
+      anoms <- all_data[[i]][all_data[[i]][[1]] %in% s_h_esd_timestamps, ]
     } else {
       anoms <- data.frame(timestamp = numeric(0), count = numeric(0))
     }
@@ -157,7 +157,7 @@ AnomalyDetectionVec <- function(x, max_anoms=0.10, direction="pos",
         thresh <- quantile(periodic_maxs, .99)
       }
       # Remove any anoms below the threshold
-      anoms <- subset(anoms, anoms[[2]] >= thresh)
+      anoms <- anoms[anoms[[2]] >= thresh, ]
     }
     all_anoms <- rbind(all_anoms, anoms)
     seasonal_plus_trend <- rbind(seasonal_plus_trend, data_decomp)
@@ -182,7 +182,7 @@ AnomalyDetectionVec <- function(x, max_anoms=0.10, direction="pos",
       data.frame(timestamp = x[[1]][(num_obs - past_obs + 1):(num_obs - period + 1)],
                  count = x[[2]][(num_obs - past_obs + 1):(num_obs - period + 1)])
 
-    all_anoms <- subset(all_anoms, all_anoms[[1]] >= x_subset_single_period[[1]][1])
+    all_anoms <- all_anoms[all_anoms[[1]] >= x_subset_single_period[[1]][1], ]
     num_obs <- length(x_subset_single_period[[2]])
   }
 
@@ -199,8 +199,7 @@ AnomalyDetectionVec <- function(x, max_anoms=0.10, direction="pos",
   if (e_value) {
     anoms <- data.frame(index = all_anoms[[1]], anoms = all_anoms[[2]],
                         expected_value =
-                          subset(seasonal_plus_trend[[2]],
-                                 seasonal_plus_trend[[1]] %in% all_anoms[[1]]))
+                          seasonal_plus_trend[[2]][seasonal_plus_trend[[1]] %in% all_anoms[[1]]])
   } else {
     anoms <- data.frame(index = all_anoms[[1]], anoms = all_anoms[[2]])
   }
