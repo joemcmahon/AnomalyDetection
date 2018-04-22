@@ -1,7 +1,7 @@
 Package: AnomalyDetection
 Type: Package
 Title: Anomaly Detection Using Seasonal Hybrid Extreme Studentized Deviate Test
-Version: 2.0
+Version: 2.0.1
 Date: 2018-04-20
 Authors@R: c(
     person("Owen", "Vallis", email = "owensvallis@gmail.com",, role = c("aut", "cre")),
@@ -26,9 +26,10 @@ Description: A technique for detecting anomalies in seasonal univariate time ser
 ByteCompile: yes
 Encoding: UTF-8
 Imports: 
-  stringr, 
-  lubridate
-Depends: R (>= 2.10.0)
+  stringi, 
+  lubridate,
+  stats
+Depends: R (>= 3.0.0)
 Suggests: testthat
 License: GPL-3
 LazyData: true

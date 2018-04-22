@@ -12,7 +12,7 @@
 #' @author Owen S. Vallis, Jordan Hochenbaum, Arun Kejariwal; Modernization
 #'         contributions by Bob Rudis
 #' @importFrom stats aggregate mad median na.omit qt quantile stl ts
-#' @importFrom stringr str_detect
+#' @importFrom stringi stri_detect_regex
 #' @importFrom lubridate days floor_date hours
 NULL
 

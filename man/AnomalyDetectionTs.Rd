@@ -22,32 +22,32 @@ timestamps and the second column consists of the observations.}
 \item{max_anoms}{Maximum number of anomalies that S-H-ESD will detect as a percentage of the
 data.}
 
-\item{direction}{Directionality of the anomalies to be detected. Options are:
-\code{'pos' | 'neg' | 'both'}.}
+\item{direction}{Directionality of the anomalies to be detected. One of:
+\code{pos}, \code{neg}, \code{both}.}
 
 \item{alpha}{The level of statistical significance with which to accept or reject anomalies.}
 
-\item{only_last}{Find and report anomalies only within the last day or hr in the time series.
-\code{NULL | 'day' | 'hr'}.}
+\item{only_last}{Find and report anomalies only within the last day or hr in the time seriess.
+One of \code{NULL}, \code{day}, \code{hr}.}
 
-\item{threshold}{Only report positive going anoms above the threshold specified. Options are:
-\code{'None' | 'med_max' | 'p95' | 'p99'}.}
+\item{threshold}{Only report positive going anoms above the threshold specified. One of:
+\code{None}, \code{med_max}, \code{p95}, \code{p99}.}
 
 \item{e_value}{Add an additional column to the anoms output containing the expected value.}
 
 \item{longterm}{Increase anom detection efficacy for time series that are greater than a month.
-See Details below.}
+See `Details`` below.}
 
-\item{piecewise_median_period_weeks}{The piecewise median time window as described in Vallis, Hochenbaum, and Kejariwal (2014).
-Defaults to 2.}
+\item{piecewise_median_period_weeks}{The piecewise median time window as described in Vallis,
+Hochenbaum, and Kejariwal (2014). Defaults to 2.}
 
 \item{verbose}{Enable debug messages}
 
-\item{na.rm}{Remove any NAs in timestamps.(default: FALSE)}
+\item{na.rm}{Remove any NAs in timestamps.(default: \code{FALSE})}
 }
 \value{
 The returned value is a data frame containing timestamps, values,
-        and optionally expected values.
+and optionally expected values.
 }
 \description{
 A technique for detecting anomalies in seasonal univariate time series where the input is a
@@ -63,11 +63,14 @@ ad_ts(raw_data, max_anoms=0.02, direction='both')
 ad_ts(raw_data, max_anoms=0.02, direction='both', only_last="day")
 }
 \references{
-Vallis, O., Hochenbaum, J. and Kejariwal, A., (2014) "A Novel Technique for
-            Long-Term Anomaly Detection in the Cloud", 6th USENIX, Philadelphia, PA.
-            Rosner, B., (May 1983), "Percentage Points for a Generalized ESD Many-Outlier Procedure"
-            , Technometrics, 25(2), pp. 165-172.
+\itemize{
+\item Vallis, O., Hochenbaum, J. and Kejariwal, A., (2014)
+"A Novel Technique for Long-Term Anomaly Detection in the Cloud", 6th USENIX, Philadelphia, PA.
+(\url{https://www.usenix.org/system/files/conference/hotcloud14/hotcloud14-vallis.pdf})
+\item Rosner, B., (May 1983), "Percentage Points for a Generalized ESD Many-Outlier
+Procedure", Technometrics, 25(2), pp. 165-172. (\url{https://www.jstor.org/stable/1268549})
+}
 }
 \seealso{
-\code{\link{AnomalyDetectionVec}}
+\code{\link[=ad_vec]{ad_vec()}}
 }

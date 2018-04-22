@@ -20,8 +20,8 @@ the observations.}
 \item{max_anoms}{Maximum number of anomalies that S-H-ESD will detect as a percentage of the
 data.}
 
-\item{direction}{Directionality of the anomalies to be detected. Options are:
-\code{'pos' | 'neg' | 'both'}.}
+\item{direction}{Directionality of the anomalies to be detected. One of:
+\code{pos}, \code{neg}, \code{both}.}
 
 \item{alpha}{The level of statistical significance with which to accept or reject anomalies.}
 
@@ -30,8 +30,8 @@ decomposition.}
 
 \item{only_last}{Find and report anomalies only within the last period in the time series.}
 
-\item{threshold}{Only report positive going anoms above the threshold specified. Options are:
-\code{'None' | 'med_max' | 'p95' | 'p99'}.}
+\item{threshold}{Only report positive going anoms above the threshold specified. One of:
+\code{None}, \code{med_max}, \code{p95}, \code{p99}.}
 
 \item{e_value}{Add an additional column to the anoms output containing the expected value.}
 
@@ -62,11 +62,14 @@ ad_vec(
 )
 }
 \references{
-Vallis, O., Hochenbaum, J. and Kejariwal, A., (2014) "A Novel Technique for
-            Long-Term Anomaly Detection in the Cloud", 6th USENIX, Philadelphia, PA.
-            Rosner, B., (May 1983), "Percentage Points for a Generalized ESD Many-Outlier Procedure"
-            , Technometrics, 25(2), pp. 165-172.
+\itemize{
+\item Vallis, O., Hochenbaum, J. and Kejariwal, A., (2014)
+"A Novel Technique for Long-Term Anomaly Detection in the Cloud", 6th USENIX, Philadelphia, PA.
+(\url{https://www.usenix.org/system/files/conference/hotcloud14/hotcloud14-vallis.pdf})
+\item Rosner, B., (May 1983), "Percentage Points for a Generalized ESD Many-Outlier
+Procedure", Technometrics, 25(2), pp. 165-172. (\url{https://www.jstor.org/stable/1268549})
+}
 }
 \seealso{
-\code{\link{AnomalyDetectionTs}}
+\code{\link[=ad_ts]{ad_ts()}}
 }
