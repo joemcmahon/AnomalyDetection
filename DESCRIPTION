@@ -12,7 +12,10 @@ Authors@R: c(
     person("Yuan", "Tang", role = c("aut", "cph"),
          email = "terrytangyuan@gmail.com",
          comment = c(ORCID = "0000-0001-5243-233X")), 
-    person("Chris", "Muir", email = "chrismuirrva@gmail.com", role = c("ctb"))
+    person("Chris", "Muir", email = "chrismuirrva@gmail.com", role = c("ctb")), 
+    person("Jun", "Cai", role = c("ctb"),
+         email = "cai-j12@mails.tsinghua.edu.cn",
+         comment = c(ORCID = "0000-0001-9495-1226"))
   )
 Maintainer: 
     Owen S. Vallis <owensvallis@gmail.com>, 
