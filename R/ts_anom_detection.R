@@ -54,7 +54,7 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
     if (ncol(x) != 2 || !is.numeric(x[[2]])) {
       stop(paste0("data must be a 2 column data.frame, with the first column being ",
                   "a set of timestamps, and the second coloumn being numeric values.",
-                  collapse=""))
+                  collapse = ""))
     }
     # Format timestamps if necessary
     if (!(class(x[[1]])[1] == "POSIXlt")) x <- format_timestamp(x)
@@ -302,7 +302,7 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
   if (e_value) {
     anoms <- data.frame(
       timestamp = all_anoms[[1]], anoms = all_anoms[[2]],
-      expected_value = seasonal_plus_trend[[2]][as.POSIXlt(seasonal_plus_trend[[1]], tz = "UTC") %in% as.POSIXlt(all_anoms[[1]], tz="UTC")],
+      expected_value = seasonal_plus_trend[[2]][as.character(as.POSIXlt(seasonal_plus_trend[[1]], tz = "UTC")) %in% all_anoms[[1]]],
       stringsAsFactors = FALSE
     )
   } else {
