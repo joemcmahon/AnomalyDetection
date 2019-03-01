@@ -14,7 +14,7 @@ ad_vec(x, max_anoms = 0.1, direction = "pos", alpha = 0.05,
   longterm_period = NULL, verbose = FALSE)
 }
 \arguments{
-\item{x}{Time series as a column data frame, list, or vector, where the column consists of
+\item{x}{Time series as a column data frame, list, or vector, where the column consists of 
 the observations.}
 
 \item{max_anoms}{Maximum number of anomalies that S-H-ESD will detect as a percentage of the
@@ -25,7 +25,7 @@ data.}
 
 \item{alpha}{The level of statistical significance with which to accept or reject anomalies.}
 
-\item{period}{Defines the number of observations in a single period, and used during seasonal
+\item{period}{Defines the number of observations in a single period, and used during seasonal 
 decomposition.}
 
 \item{only_last}{Find and report anomalies only within the last period in the time series.}
@@ -35,8 +35,8 @@ decomposition.}
 
 \item{e_value}{Add an additional column to the anoms output containing the expected value.}
 
-\item{longterm_period}{Defines the number of observations for which the trend can be considered
-flat. The value should be an integer multiple of the number of observations in a single period.
+\item{longterm_period}{Defines the number of observations for which the trend can be considered 
+flat. The value should be an integer multiple of the number of observations in a single period. 
 This increases anom detection efficacy for time series that are greater than a month.}
 
 \item{verbose}{Enable debug messages}
@@ -47,7 +47,7 @@ The returned value is a list with the following components.
 Data frame containing index, values, and optionally expected values.
 }
 \description{
-A technique for detecting anomalies in seasonal univariate time series where the input is a
+A technique for detecting anomalies in seasonal univariate time series where the input is a 
 series of observations.
 }
 \examples{
