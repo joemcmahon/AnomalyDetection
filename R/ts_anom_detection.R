@@ -53,7 +53,7 @@ AnomalyDetectionTs <- function(x, max_anoms = 0.10, direction = "pos",
   } else {
     if (ncol(x) != 2 || !is.numeric(x[[2]])) {
       stop(paste0("data must be a 2 column data.frame, with the first column being ",
-                  "a set of timestamps, and the second coloumn being numeric values.",
+                  "a set of timestamps, and the second column being numeric values.",
                   collapse = ""))
     }
     # Format timestamps if necessary
